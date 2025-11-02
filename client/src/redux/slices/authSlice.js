@@ -2,7 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 
-const API_URL = '/api/auth'
+const API_URL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL.replace('/api', '')}/api/auth`
+  : '/api/auth'
 
 // Get user from localStorage
 const user = JSON.parse(localStorage.getItem('user'))

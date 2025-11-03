@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 import io from 'socket.io-client'
 import toast from 'react-hot-toast'
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000'
 const MESSAGES_PER_PAGE = 10
 
 // File size limits (in bytes)
@@ -267,11 +267,25 @@ function Chats() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     const newSocket = io(SOCKET_URL, {
-      auth: { token }
+      auth: { token },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
+      withCredentials: true
     })
 
     newSocket.on('connect', () => {
-      console.log('Socket connected')
+      console.log('✅ Socket connected:', newSocket.id)
+    })
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Socket connection error:', error)
+      console.log('Trying to connect to:', SOCKET_URL)
+    })
+
+    newSocket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason)
     })
 
     newSocket.on('receive_message', (data) => {
